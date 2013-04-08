@@ -1,22 +1,71 @@
 <?php
-require_once('./SBClientApi/php-classes/class_CurlMngr.php');
-require_once('./SBClientApi/php-classes/class_SBUser.php');
+require_once(__DIR__.'/class_CurlMngr.php');
+require_once(__DIR__.'/class_SBUser.php');
+require_once(__DIR__.'/../includes/SBFunctions.php');
+/**
+ * SBMessage
+ * 
+ * Describes a Spotbros message
+ * 
+ * @author Spotbros <support@spotbros.com>
+ * @version 0.01
+ */
 class SBMessage
 {
-  private $_curlMngr;
-  private $_appKey;
+	/**
+	 * App's sbcode
+	 * @var string
+	 */
   private $_appSBCode;
-  private $_SBMessageInitialized;
+  /**
+   * App's key
+   * @var string
+   */
+  private $_appKey;
+	/**
+	 * CurlMngr instance to handle outgoing web requests and incoming responses
+	 * @var CurlMngr
+	 */
+  private $_curlMngr;
+  /**
+   * Message's text (not the text included in the attachment)
+   * @var string
+   */
   private $_SBMessageText;
+  /**
+   * Message's attachment references
+   * @var array
+   */
   private $_SBMessageAttachmentRefs;
+  /**
+   * Message's attachments
+   * @var array
+   */
   private $_SBMessageAttachments;
+  /**
+   * Message's id
+   * @var string
+   */
   private $_SBMessageId;
+  /**
+   * Message's date
+   * @var string
+   */
   private $_SBMessageDate;
+  /**
+   * Message's sender
+   * @var SBUser
+   */
   private $_fromUser;
   /**
+   * Message's initialization status
+   * @var boolean
+   */
+  private $_SBMessageInitialized;
+  /**
    * Creates a new instance of SBMessage, keeping it uninitialized until the message is loaded
-   * @param unknown_type $appSBCode_	the app's sbcode
-   * @param unknown_type $appKey_			the app's key
+   * @param string $appSBCode_	the app's sbcode
+   * @param string $appKey_			the app's key
    */
   public function __construct($appSBCode_,$appKey_)
   {
@@ -29,6 +78,7 @@ class SBMessage
   /**
    * Sets all message's attributes
    * @param string $SBMessageData_	json encoded string containing all the message's attributes
+   * @return boolean true if message data could be set or false if it could not be set
    */
   private function loadSBMessageDataOrFalse($SBMessageData_)
   {
@@ -65,7 +115,7 @@ class SBMessage
                                     $SBMessageDataArray["V1"]["userName"], 
                                     $SBMessageDataArray["V1"]["userLastName"], 
                                     $SBMessageDataArray["V1"]["userGender"], 
-                                    $SBMessageDataArray["V1"]["userProfilePicMD5"], 
+                                    $SBMessageDataArray["V1"]["userProfilePicMD5"],
                                     $SBMessageDataArray["V1"]["userRating"]
                                    );
         $this->loadAttachmentRefsOrFalse();
@@ -76,7 +126,7 @@ class SBMessage
   }
   /**
    * Loads message's attachment references
-   * @return	false if there was any error while getting them
+   * @return void|false loads attachment refs in _SBMessageAttachments or false if there was any error
    */
   private function loadAttachmentRefsOrFalse()
   {
@@ -87,8 +137,8 @@ class SBMessage
                     "appKey"=>$this->_appKey,
                     "attachments"=>json_encode($this->_SBMessageAttachmentRefs)
                     );
-      $handlerId=$this->_curlMngr->queryStringThisUrlOrFalse("http://".SBVars::SB_WEBSERVICE_ADDR."/public-api/getAttachmentInfo.php",$params,1000);
-      if((($responses=$this->_curlMngr->getResponsesWhenReadyOrFalse(1000))!=false) && isset($responses[$handlerId]) && $responses[$handlerId]!=false)
+      $handlerId=$this->_curlMngr->queryStringThisUrlOrFalse(SBVars::SB_WEBSERVICE_ADDR."/public-api/getAttachmentInfo.php",$params,30000);
+      if((($responses=$this->_curlMngr->getResponsesWhenReadyOrFalse(30000))!=false) && isset($responses[$handlerId]) && $responses[$handlerId]!=false)
       {
         if(($attachmentInfoArray=json_decode($responses[$handlerId],true))!=null)
         {
@@ -147,6 +197,7 @@ class SBMessage
   /**
    * Loads a message by its message id
    * @param string $SBMessageId_	the message's id
+   * @return boolean true if the message could be loaded or false if it could not be loaded
    */
   public function loadSBMessageBySBMessageIdOrFalse($SBMessageId_)
   {
@@ -155,8 +206,8 @@ class SBMessage
                   "appKey"=>$this->_appKey,
                   "SBMessageId"=>$SBMessageId_
                  );
-    $handlerId=$this->_curlMngr->queryStringThisUrlOrFalse("http://".SBVars::SB_WEBSERVICE_ADDR."/public-api/getSBMessage.php",$params,1000);
-    if(($responses=$this->_curlMngr->getResponsesWhenReadyOrFalse(1000))!=false)
+    $handlerId=$this->_curlMngr->queryStringThisUrlOrFalse(SBVars::SB_WEBSERVICE_ADDR."/public-api/getSBMessage.php",$params,30000);
+    if(($responses=$this->_curlMngr->getResponsesWhenReadyOrFalse(30000))!=false)
     {
       return (isset($responses[$handlerId]) && $responses[$handlerId]!=false)?$this->loadSBMessageDataOrFalse($responses[$handlerId]):false;
     }
@@ -164,12 +215,13 @@ class SBMessage
   }
   /**
    * Checks whether message data is loaded (i.e. message is initialized)
+   * @return boolean true if the message is initialized or false if it is not
    */
   public function isDataLoaded()
   {return $this->_SBMessageInitialized;}
   /**
    * Gets message's text
-   * @return	the message's text or false if message data was not loaded
+   * @return string|false the message's text or false if message data was not loaded
    */
   public function getSBMessageTextOrFalse()
   {
@@ -177,15 +229,15 @@ class SBMessage
   }
   /**
    * Gets message's Id
-   * @return	the message's id or false if message data was not loaded
+   * @return string|false the message's id or false if message data was not loaded
    */
-  public function getSBMessageIdFalse()
+  public function getSBMessageIdOrFalse()
   {
     return $this->isDataLoaded()?$this->_SBMessageId:false;
   }
   /**
    * Gets message's attachments
-   * @return	the message's attachments or false if message data was not loaded
+   * @return array|false the message's attachments or false if message data was not loaded
    */
   public function getSBMessageAttachmentsOrFalse()
   {
@@ -193,7 +245,7 @@ class SBMessage
   }
   /**
    * Gets message's attachment references
-   * @return	the message's attachment references or false if data was not loaded 
+   * @return array|false the message's attachment references or false if data was not loaded 
    */
   public function getSBMessageAttachmentRefsOrFalse()
   {
@@ -201,7 +253,7 @@ class SBMessage
   }
   /**
    * Gets message's date
-   * @return	the message's date or false if message data was not loaded
+   * @return string|false the message's date or false if message data was not loaded
    */
   public function getSBMessageDateOrFalse()
   {
@@ -209,11 +261,11 @@ class SBMessage
   }
   /**
    * Gets message's creator
-   * @return		an instance of SBUser or false if message data was not loaded
+   * @return SBUser an instance of SBUser or false if message data was not loaded
    */
   public function getSBMessageFromUserOrFalse()
   {
     return $this->isDataLoaded()?$this->_fromUser:false;  
   }
 }
-?>
+?> 
