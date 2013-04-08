@@ -1,37 +1,37 @@
 <?php
-require_once('../SBClientApi/SBApp.php');
+require_once('./SBClientApi/SBApp.php');
 class EchoBot extends SBApp
 {
 	protected function onError($errorType_)
 	{
 		error_log($errorType_);
 	}
-	 
 	protected function onNewVote(SBUser $user_,$newVote_,$oldRating_,$newRating_)
 	{
-		if(($userSBCode=$user_->getSBUserSBCodeOrFalse()))
-		{
-			$this->sendTextMessageOrFalse("You voted me with ".$newVote_.", my oldRating was: ".$oldRating_." and now is ".$newRating_, $userSBCode);
-		}
+		$this->replyOrFalse("Thanks for voting me with ".$newVote_." stars");
 	}
 	protected function onNewContactSubscription(SBUser $user_)
 	{
-		if(($userName=$user_->getSBUserNameOrFalse()) && ($userSBCode=$user_->getSBUserSBCodeOrFalse()))
+		if(($userName = $user_->getSBUserNameOrFalse()))
 		{
-			$this->sendTextMessageOrFalse("Hi ".$userName.", thanks for becoming my friend", $userSBCode);
+			$this->replyOrFalse("Hi ".$userName."! Welcome to echobot!");
 		}
 	}
 	protected function onNewContactUnSubscription(SBUser $user_)
 	{
-		error_log("The user ".$user_->getSBUserNameOrFalse()." has just unsubscribed");
+		if(($userName = $user_->getSBUserNameOrFalse()))
+		{
+			$this->replyOrFalse("See you soon ".$userName."!");
+		}
 	}
-
 	protected function onNewMessage(SBMessage $msg_)
 	{
-		return $this->replyOrFalse($msg_->getSBMessageTextOrFalse());
+		if(($messageText = $msg_->getSBMessageTextOrFalse()))
+		{
+			$this->replyOrFalse("You just told me: ".$messageText);
+		}
 	}
 }
-
-$echoBot=new EchoBot("","");
+$echoBot=new EchoBot($echoBotSBCode,$echoBotKey);
 $echoBot->serveRequest($_GET["params"]);
 ?>
