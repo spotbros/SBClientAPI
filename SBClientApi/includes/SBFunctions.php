@@ -1,6 +1,11 @@
 <?php
 require_once(__DIR__.'/SBTypes.php');
-
+/**
+ * Inspects an object of a given class and returns an array containing its constants
+ * @param mixed $object_	the object to be inspected
+ * @param array $reversed_	if true, works as array_flip
+ * @return array	an array of constants
+ */
 function getConstantValues($object_, $reversed_=false)
 {
 	$className = get_class($object_);
@@ -20,7 +25,7 @@ function getConstantValues($object_, $reversed_=false)
 /**
  * Verifies if the attachment type is valid
  * @param SBAttachmentType $attachmentType_ the attachment type to be verified
- * @return bool true if the attachemnt type is valid or false if it is not
+ * @return bool true if the attachemnt type is valid, false otherwise
  */
 function isValidAttachmentType($attachmentType_)
 {
@@ -131,20 +136,36 @@ function php_json_encode($arr)
 	}
 	return $json_str;
 }
-
+/**
+ * Gets the current day of the year as float
+ * @return int	the day of the year
+ */
 function getCurrentDayNum()
 {
 	return floor(time()/(60*60*24));
 }
+/**
+ * Gets the current time (since Epoch) in millis as string
+ * @return string	the current time (since epoch) in millis
+ */
 function getCurrentTimeMS()
 {
 	return (string)round((microtime(1)*1000),0);
 }
+/**
+ * Gets the current time (since Epoch) in seconds as string
+ * @return string	the current time (since epoch) in seconds
+ */
 function getCurrentTimeS()
 {
 	return (string)time();
 }
-
+/**
+ * Given a stack of words and an input string, gives us the most similar word from the stack to the input string
+ * @param string $needle_	the input string
+ * @param array $stack_	the possible words
+ * @return array	containing the most important word (its key in the stack, the word itself, the % of similarity, the # of matching chars between the input string and the chosen word)
+ */
 function findMostSimilarWord($needle_,Array $stack_)
 {
 	$p=$hP=$hN=0;
@@ -174,7 +195,12 @@ function findMostSimilarWord($needle_,Array $stack_)
 	}
 	return array($msk,$msw,$hP,$hN);
 }
-function preprocessMessage($message_)
+/**
+ * Scapes special characters from a string
+ * @param string $message_	the input string
+ * @return string	the scaped string
+ */
+function preprocessMessage($str_)
 {
 	return strtolower(rtrim(ltrim(str_replace( array('à','á','â','ã','ä', 'ç', 'è','é','ê','ë', 'ì','í','î','ï', 'ñ', 'ò','ó','ô','õ','ö', 'ù','ú','û','ü', 'ý','ÿ', 'À','Á','Â','Ã','Ä', 'Ç', 'È','É','Ê','Ë', 'Ì','Í','Î','Ï', 'Ñ', 'Ò','Ó','Ô','Õ','Ö', 'Ù','Ú','Û','Ü', 'Ý'), array('a','a','a','a','a', 'c', 'e','e','e','e', 'i','i','i','i', 'n', 'o','o','o','o','o', 'u','u','u','u', 'y','y', 'A','A','A','A','A', 'C', 'E','E','E','E', 'I','I','I','I', 'N', 'O','O','O','O','O', 'U','U','U','U', 'Y'), $message_))));
 }
