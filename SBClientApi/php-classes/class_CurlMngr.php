@@ -3,7 +3,7 @@ require_once(__DIR__.'/../includes/SBFunctions.php');
 /**
  * CurlMngr
  * 
- * Enables parallel queries using CURL
+ * Provides connectivity functions using cURL
  * 
  * @author Spotbros <support@spotbros.com>
  * @version 0.01
@@ -26,7 +26,7 @@ class CurlMngr
    */
   private $_cHandlers;
   /**
-   * Creates a new instance of CurlMngr
+   * Initializes the multi-handler resource and the array of handlers
    */
   private function __construct()
   {
@@ -39,7 +39,7 @@ class CurlMngr
   public function __destruct()
   {}
   /**
-   * Gets current CurlMngr instance
+   * Gets current CurlMngr instance if it exists. If not, creates one and returns it
    * @return CurlMngr the CurlMngr instance
    */
   public static function getInstance() 
@@ -49,12 +49,12 @@ class CurlMngr
     return self::$_CurlMngrInstance; 
   }
   /**
-   * Queries url using cURL
-   * @param string $url_							the url to query
-   * @param array $params_						the url parameters as ("param0" => "value0", "param1" => "value1"...,"paramN" => "valueN")
-   * @param integer $timeoutMS_				the maximum number of seconds to allow cURL functions to execute
-   * @param string $userAgent_				the contents of the "User Agent" header for http requests
-   * @return string|false							the handler id or bool false if any error ocurred
+   * Queries an URL using cURL
+   * @param string $url_	the url to query
+   * @param array $params_	the url parameters as ("param0" => "value0", "param1" => "value1"...,"paramN" => "valueN")
+   * @param integer $timeoutMS_	the maximum number of seconds to allow cURL functions to execute
+   * @param string $userAgent_	the contents of the "User Agent" header for http requests
+   * @return string|false	the handler id or bool false if any error ocurred
    */
   public function queryStringThisUrlOrFalse($url_, Array $params_=null, $timeoutMS_=1000,$userAgent_="")
   {
@@ -84,11 +84,11 @@ class CurlMngr
 		return false;
   }
   /**
-   * Performs a POST HTTP request using cURL
-   * @param string $url_				the url to query the POST request
+   * Performs a HTTP POST request using cURL
+   * @param string $url_	the url to perform the HTTP POST request
    * @param integer $timeoutMS_	the maximum number of seconds to allow cURL functions to execute
-   * @param string $json_				json encoded string, which will be the body of the POST request
-   * @return string|false				the handler id or bool false if any error ocurred
+   * @param string $json_	json encoded string, which will be the body of the POST request
+   * @return string|false	the handler id or bool false if any error ocurred
    */
   public function postJSONToThisURLOrFalse($url_,$timeoutMS_=1000, $json_)
   {
@@ -112,7 +112,15 @@ class CurlMngr
 		unset($this->_cHandlers[$handlerId]);
 		return false;
   }
-  //Explicar en la documentacion que la subida de ficheros es sincrona, la de quotes etc.. no
+  /**
+   * Uploads a file using a HTTP POST request
+   * @param string $url_	the URL to perform the HTTP POST request to
+   * @param string $filePath_	the path to the file that we want to upload
+   * @param array $params_ the data to post in the HTTP POST request
+   * @param integer $timeoutMS_	the maximum number of seconds to allow cURL functions to execute
+   * @param string $userAgent_	the contents of the "User Agent" header for http requests
+   * @return string|false	the handler id or bool false if any error ocurred
+   */
   public function postFileToUrlOrFalse($url_,$filePath_,Array $params_,$timeoutMS_=10000,$userAgent_="")
   {
   	if(file_exists($filePath_))
@@ -133,7 +141,6 @@ class CurlMngr
   			curl_setopt($this->_cHandlers[$handlerId], CURLOPT_RETURNTRANSFER, true);
   			curl_setopt($this->_cHandlers[$handlerId], CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_1_0);
   			curl_setopt($this->_cHandlers[$handlerId], CURLOPT_TIMEOUT_MS, $timeoutMS_); 
-//   			return curl_exec($ch); // como ahora se capturan los md5 a la hora de enviar el sbmail, necesitamos el handler id para mantener orden de attachments
   			if(curl_multi_add_handle($this->_MCHandler,$this->_cHandlers[$handlerId])==0)
   			{
   				curl_multi_exec($this->_MCHandler, $active);
@@ -170,13 +177,12 @@ class CurlMngr
   		}
   		$replies[$handlerId] = curl_multi_getcontent($handler); 
   	}
-//   	   	$this->_cHandlers=array(); // si llamamos más de una vez a este método no perdemos los handlers antiguos
   	return $replies;
   }
   /**
    * Downloads file from URL to the specified filepath or /tmp/[FILE_NAME]. If the file already exists, it is not downloaded
    * @param string $url_	the URL to the file
-   * @param string $filePath_	the file path where the file will be downloaded to
+   * @param string $filePath_	the path where the file will be downloaded to
    * @return string|boolean	the path to the downloaded file or false if any error occurs
    */
   public function downloadFileOrFalse($url_,$filePath_="")
