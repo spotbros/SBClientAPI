@@ -1,5 +1,5 @@
 <?php
-require_once('./SBClientApi/SBClientApi.php');
+require_once('../SBClientApi/SBClientApi.php');
 /**
  * Send notification to followers
  * 
@@ -11,10 +11,10 @@ class NotificationSender extends SBClientApi
 	public function sendNotificationToFollowers($notificationToBeSent_)
 	{
 		if(!($followersSBCodes = $this->getFollowerSBCodesOrFalse()))
-		{print ("There was an error while getting the sbcodes");}
+		{error_log ("There was an error while getting the sbcodes");}
 		print_r($followersSBCodes);
 		if (!($this-> sendTextMessageToGroupOrFalse($notificationToBeSent_, $followersSBCodes)))
-		{print ("Could not send message to group");}
+		{error_log ("Could not send message to group");}
 	}
 }
 

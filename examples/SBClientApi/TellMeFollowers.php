@@ -1,5 +1,5 @@
 <?php
-require_once('./SBClientApi/SBApp.php');
+require_once('../SBClientApi/SBApp.php');
 /**
  * Tell me followers application
  * 
@@ -15,9 +15,9 @@ class TellMeFollowersApp extends SBApp
 	{
 		$applicationCreatorSBCode = "APPCREA";
 		if(!($nFollowers = $this->getFollowerNumOrFalse()))
-		{print ("Could not get follower's number");}
+		{error_log ("Could not get follower's number");}
 		if (!($this-> sendTextMessageOrFalse("New follower!Total is: ".$nFollowers, $applicationCreatorSBCode)))
-		{print ("Could not send message to group");}
+		{error_log ("Could not send message");}
 	}
 	protected function onNewContactUnSubscription(SBUser $sbUser_){}
 	protected function onNewMessage(SBMessage $message_){}

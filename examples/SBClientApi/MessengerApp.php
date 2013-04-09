@@ -1,8 +1,8 @@
 <?php
-require_once('./SBClientApi/SBApp.php');
+require_once('../SBClientApi/SBApp.php');
 /**
  * Messenger application
- * 
+ *
  * Says hello to any user who sends a message to it
  * @author Spotbros <support@spotbros.com>
  */
@@ -13,12 +13,14 @@ class MessengerApp extends SBApp
 	protected function onNewContactSubscription(SBUser $sbUser_){}
 	protected function onNewContactUnSubscription(SBUser $sbUser_){}
 	protected function onNewMessage(SBMessage $message_)
-	{	
+	{
 		// destination user's sbcode
 		$sbcode = "TESTSBC";
 		// send message to user
 		if (!$this-> sendTextMessageOrFalse("Hello there!", $sbcode))
-		{print "Could not send message to the user with sbcode: ".$sbcode;}
+		{
+			print "Could not send message to the user with sbcode: ".$sbcode;
+		}
 	}
 }
 

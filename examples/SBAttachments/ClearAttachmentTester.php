@@ -1,5 +1,5 @@
 <?php 
-require_once('./SBClientApi/SBApp.php');
+require_once('../SBClientApi/SBApp.php');
 /**
  * Clear attachment tester application
  *
