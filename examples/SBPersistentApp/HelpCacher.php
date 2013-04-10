@@ -1,5 +1,5 @@
 <?php
-require_once('../SBClientApi/SBPersistentApp.php');
+require_once('../SBClientSDK/SBPersistentApp.php');
 /** 
  * Content Cacher App
  * 

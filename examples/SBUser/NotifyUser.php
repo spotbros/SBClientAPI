@@ -1,5 +1,5 @@
 <?php
-require_once('../SBClientApi/SBClientApi.php');
+require_once('../SBClientSDK/SBClientApi.php');
 /** 
  * Daily Winner notificator
  * 

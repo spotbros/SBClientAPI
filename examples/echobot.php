@@ -1,5 +1,5 @@
 <?php
-require_once('../SBClientApi/SBApp.php');
+require_once('../SBClientSDK/SBApp.php');
 class EchoBot extends SBApp
 {
 	protected function onError($errorType_)
