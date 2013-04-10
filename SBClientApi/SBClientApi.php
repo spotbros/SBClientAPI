@@ -68,7 +68,7 @@ class SBClientApi
    * Send a text message to a group of App followers. If attachments are set, then they will be automatically embedded
    * into the message as a SBMail.
    * @param string $msgText_				The text of the message to be sent
-   * @param array $toSBCodes_				The SBCodes of the App followers who will receive the message
+   * @param array $toSBCodes_				The SBCodes of the SBApp followers who will receive the message
    * @return Array of DeliveryStatus (as per sendTextMessageOrFalse) or False
    */
   public function sendTextMessageToGroupOrFalse($msgText_,Array $toSBCodes_)
@@ -96,6 +96,37 @@ class SBClientApi
   		if(isset($responses[$handlerId]) && $responses[$handlerId]!=false)
   		{
   			return (($responseData=json_decode($responses[$handlerId],true))!=null)&&(isset($responseData["CID"]) && $responseData["CID"]=="SBMailSentOk")?$responseData:false;
+  		}
+  	}
+  	return false;
+  }
+  /**
+   * Forwards a message to a group of SBApp followers.
+   * @param string $SBMessageId_	the id of the message to be forwarded
+   * @param array $toSBCodes_		the SBCodes of the SBApp followers who will receive the message
+   * @return Array of DeliveryStatus (as per sendTextMessageOrFalse) or False
+   */
+  public function forwardSBMessageOrFalse($SBMessageId_,Array $toSBCodes_)
+  {
+  	$msgUniqueIds = array();
+  	foreach($toSBCodes_ as $sbcode)
+  	{
+  		$msgUniqueIds[] = md5(rand(0,100000000).rand(0,100000000).rand(0,100000000).rand(0,100000000).microtime(1));
+  	}
+  	 
+  	$params=array(
+  			"appSBCode"=>$this->_appSBCode,
+  			"appKey"=>$this->_appKey,
+  			"messageId"=>$SBMessageId_,
+  			"toSBCodes"=>json_encode($toSBCodes_),
+  			"msgUniqueIds"=>json_encode($msgUniqueIds),
+  	);
+  	$handlerId=$this->_curlMngr->queryStringThisUrlOrFalse(SBVars::SB_WEBSERVICE_ADDR."/public-api/forwardSBMessage.php",$params,1000);
+  	if(($responses=$this->_curlMngr->getResponsesWhenReadyOrFalse(1000))!=false)
+  	{
+  		if(isset($responses[$handlerId]) && $responses[$handlerId]!=false)
+  		{
+  			return (($responseData=json_decode($responses[$handlerId],true))!=null)&&(isset($responseData["CID"]) && $responseData["CID"]=="ForwardOk")?$responseData:false;
   		}
   	}
   	return false;
@@ -133,7 +164,7 @@ class SBClientApi
   }
   /**
    * Gets the number of followers for the current SBApp
-   * @return integer|false The number of followers or false if there was any error while getting it
+   * @return integer|false The number of followers or false if any error occurs
    */
   public function getFollowerNumOrFalse()
   {
@@ -160,37 +191,6 @@ class SBClientApi
       }
     }
     return false;
-  }
-  /**
-   * Forwards a message to a group of App followers. 
-   * @param string $SBMessageId_	The message id to be forwarded
-   * @param array $toSBCodes_		The SBCodes of the App followers who will receive the message
-   * @return Array of DeliveryStatus (as per sendTextMessageOrFalse) or False
-   */
-  public function forwardSBMessageOrFalse($SBMessageId_,Array $toSBCodes_)
-  {
-  	$msgUniqueIds = array();
-  	foreach($toSBCodes_ as $sbcode)
-  	{
-  		$msgUniqueIds[] = md5(rand(0,100000000).rand(0,100000000).rand(0,100000000).rand(0,100000000).microtime(1));
-  	}
-  	
-  	$params=array(
-  			"appSBCode"=>$this->_appSBCode,
-  			"appKey"=>$this->_appKey,
-  			"messageId"=>$SBMessageId_,
-  			"toSBCodes"=>json_encode($toSBCodes_),
-  			"msgUniqueIds"=>json_encode($msgUniqueIds),
-  	);
-  	$handlerId=$this->_curlMngr->queryStringThisUrlOrFalse(SBVars::SB_WEBSERVICE_ADDR."/public-api/forwardSBMessage.php",$params,1000);
-  	if(($responses=$this->_curlMngr->getResponsesWhenReadyOrFalse(1000))!=false)
-  	{
-  		if(isset($responses[$handlerId]) && $responses[$handlerId]!=false)
-  		{
-  			return (($responseData=json_decode($responses[$handlerId],true))!=null)&&(isset($responseData["CID"]) && $responseData["CID"]=="ForwardOk")?$responseData:false;
-  		}
-  	}
-  	return false;
   }
 }
 ?> 

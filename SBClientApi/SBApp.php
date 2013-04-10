@@ -10,6 +10,11 @@ require_once(__DIR__.'/php-classes/class_SBAttachments.php');
  */
 abstract class SBApp extends SBClientApi
 {
+	/**
+	 * Creates a new instance of SBApp
+	 * @param string $appSBCode_	the SBApp's sbcode
+	 * @param string $appKey_	the SBApp's key
+	 */
 	public function __construct($appSBCode_,$appKey_)
 	{
 		parent::__construct($appSBCode_, $appKey_);
@@ -72,13 +77,12 @@ abstract class SBApp extends SBClientApi
   }
   
   /**
-   * This function receives $_GET["params"], parses it and invokes the appropriate callBacks
+   * This function receives $_GET["params"], parses it and invokes the appropriate callBacks on the target SBApp
    * @param  Name of the return + N parameters
    * @return void
    */
   public function serveRequest($params_)
   {
-    error_log($params_);
     if((($requestData=json_decode($params_,true))!=null) && $this->isValidParams($requestData))
     {
      switch($requestData["eventType"])
@@ -105,7 +109,6 @@ abstract class SBApp extends SBClientApi
             $fromUser=new SBUser($this->_appSBCode,$this->_appKey);
             if($fromUser->loadUserBySBCodeOrFalse($requestData["userSBCode"]))
             {
-            	error_log("THE_USER: ".print_r($fromUser,true));
               $fromUser->setSBUserEmail($requestData["userEmail"]);
               $fromUser->setSBUserLocation($requestData["userLatitude"], $requestData["userLongitude"]);
               $fromUser->setSBUserPhoneKey($requestData["userPhoneKey"]);
@@ -166,11 +169,10 @@ abstract class SBApp extends SBClientApi
     else
     {$this->onError(SBErrors::WRONG_PARAMS_FORMAT_ERROR);}
   }
-  
-
   /**
-   * Sends a message to the user who just wrote you
-   * @param string	$msgText_ The message to reply with
+   * Sends a message to the user who generated the last event (either SBAppEventType::NEW_MESSAGE, SBAppEventType::NEW_CONTACT_SUBSCRIPTION,
+   * SBAppEventType::NEW_CONTACT_UNSUBSCRIPTION or SBAppEventType::NEW_VOTE)
+   * @param string	$msgText_ the text of the response message
    * @return array|false the result of the reply or false on error
    */
   public function replyOrFalse($msgText_)

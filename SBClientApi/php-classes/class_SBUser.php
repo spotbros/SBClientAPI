@@ -89,8 +89,8 @@ class SBUser
 	private $_userInitialized;
 	/**
 	 * Creates an instance of SBUser, keeping it uninitialized until the user is loaded
-	 * @param unknown_type $appSBCode_			the app's sbcode
-	 * @param unknown_type $appKey_					the app's key
+	 * @param unknown_type $appSBCode_			the SBApp's sbcode
+	 * @param unknown_type $appKey_					the SBApp's key
 	 */
 	public function __construct($appSBCode_,$appKey_)
 	{
@@ -147,7 +147,6 @@ class SBUser
 	{
 		if(($SBUserDataArray=json_decode($SBUserData_,true))!=null)
 		{
-			error_log("USERDATA: ".print_r($SBUserData_,true));
 			if(
 					isset($SBUserDataArray["CID"]) &&
 					$SBUserDataArray["CID"] == "SBUser" &&
@@ -296,7 +295,7 @@ class SBUser
 	}
 	/**
 	 * Sets user's phone key
-	 * @param unknown_type $phoneKey_		the user's new phone key
+	 * @param unknown_type $phoneKey_	the user's new phone key
 	 */
 	public function setSBUserPhoneKey($phoneKey_)
 	{
@@ -304,8 +303,8 @@ class SBUser
 	}
 	/**
 	 * Set user's location
-	 * @param unknown_type $latitude_		the user's new latitude
-	 * @param unknown_type $longitude_	the user's new longitude
+	 * @param float $latitude_	the user's new latitude
+	 * @param float $longitude_	the user's new longitude
 	 */
 	public function setSBUserLocation($latitude_,$longitude_)
 	{
@@ -314,7 +313,7 @@ class SBUser
 	}
 	/**
 	 * Sets user's language_
-	 * @param unknown_type $language_		the new user's language
+	 * @param string $language_	the new user's language
 	 */
 	public function setSBUserLanguage($language_)
 	{

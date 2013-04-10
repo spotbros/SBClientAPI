@@ -9,19 +9,21 @@ require_once(__DIR__.'/includes/predis/predis.php');
  */
 abstract class SBPersistentApp extends SBApp
 {
-	// the redis client object
+	/*
+	 * The redis client object
+	 */
 	private $_rClient;
 	/**
 	 * Constructor
-	 * @param string $key_	the app key
-	 * @param string $SBCode_	the app sbcode
+	 * @param string $appSBCode_	the SBApp's sbcode
+	 * @param string $appKey_	the SBApp's key
 	 * @param string $ip_	the IP of the host where redis server is running
 	 * @param string $port_	the port on which redis server is running
 	 */
-	public function __construct($key_, $SBCode_, $ip_="127.0.0.1", $port_="6379")
+	public function __construct($appSBCode_, $appKey_, $ip_="127.0.0.1", $port_="6379")
 	{
 		$this->_rClient=new Predis_Client(array('host'=>$ip_,'port'=>$port_,'connection_timeout'=>0.1));
-		parent::__construct($key_,$SBCode_);
+		parent::__construct($appSBCode_,$appKey_);
 	}
 	/**
 	 * Verifies whether the connection to redis is OK
@@ -49,10 +51,10 @@ abstract class SBPersistentApp extends SBApp
 	 * Sets the value of a key
 	 * @param string $key_	the key to be set
 	 * @param string $value_	the value of the key
-	 * @param int $ttl_	the ttl for that key (when it will expire)
+	 * @param int $ttl_	the ttl for this key (when it will expire)
 	 * @return true|false true if the key was set or false if there was any error with the key/connection
 	 */
-	protected function setOrFalse($key_,$value_,$ttl_=0)
+	public function setOrFalse($key_,$value_,$ttl_=0)
 	{
 		if($this->isRDBConnectionOk() && (strlen($this->_appSBCode)>0) && is_string($key_) && (strlen($key_)>0))
 		{
@@ -77,7 +79,7 @@ abstract class SBPersistentApp extends SBApp
 	 * @param string $key_	the key
 	 * @return mixed|false	the value of the key or false if there is any error or the key does not exist
 	 */
-	protected function getOrFalse($key_)
+	public function getOrFalse($key_)
 	{
 		if($this->isRDBConnectionOk() && (strlen($this->_appSBCode)>0) && is_string($key_) && (strlen($key_)>0))
 		{
@@ -96,7 +98,7 @@ abstract class SBPersistentApp extends SBApp
 	 * @param string $key_	the key to be deleted
 	 * @return bool true if the key was deleted, false otherwise
 	 */
-	protected function delOrFalse($key_)
+	public function delOrFalse($key_)
 	{
 		if($this->isRDBConnectionOk() && (strlen($this->_appSBCode)>0) && is_string($key_) && (strlen($key_)>0))
 		{
@@ -113,12 +115,12 @@ abstract class SBPersistentApp extends SBApp
 	
 	/* lists */
 	/**
-	 * Store value at the end of the list stored at some key
-	 * @param string $key_	the key where the list is stored at
+	 * Stores value at the end of the list stored at some key
+	 * @param string $key_	the key where the list is stored
 	 * @param mixed $value_	the value to be stored at the end of the list
-	 * @return int|false	the lenght of the list after the insertion or false if any error occurs
+	 * @return integer|false	the length of the list after the insertion or false if any error occurs
 	 */
-	protected function rpushOrFalse($key_,$value_)
+	public function rpushOrFalse($key_,$value_)
 	{
 		if($this->isRDBConnectionOk() && (strlen($this->_appSBCode)>0) && is_string($key_) && (strlen($key_)>0))
 		{
@@ -134,10 +136,10 @@ abstract class SBPersistentApp extends SBApp
 	}
 	/**
 	 * Removes and returns the first element of the list stored at key
-	 * @param string $key_	the key where the list is stored at
+	 * @param string $key_	the key where the list is stored
 	 * @return mixed|false	the value of the first element of the list or false if any error occurs
 	 */
-	protected function lpopOrFalse($key_)
+	public function lpopOrFalse($key_)
 	{
 		if($this->isRDBConnectionOk() && (strlen($this->_appSBCode)>0) && is_string($key_) && (strlen($key_)>0))
 		{
@@ -153,10 +155,10 @@ abstract class SBPersistentApp extends SBApp
 	}
 	/**
 	 * Returns all the elements of the list specified at some key
-	 * @param string $key_	the key where the list is stored at
+	 * @param string $key_	the key where the list is stored
 	 * @return integer|false	the elements of the list or false if any error occurs
 	 */
-	protected function lrangeOrFalse($key_)
+	public function lrangeOrFalse($key_)
 	{
 		if($this->isRDBConnectionOk() && (strlen($this->_appSBCode)>0) && is_string($key_) && (strlen($key_)>0))
 		{
@@ -172,10 +174,10 @@ abstract class SBPersistentApp extends SBApp
 	}
 	/**
 	 * Returns the length of the list stored at some key
-	 * @param string $key_	the key where the list is stored at
+	 * @param string $key_	the key where the list is stored
 	 * @return integer|false	the length of the list or false if any error occurs
 	 */
-	protected function llenOrFalse($key_)
+	public function llenOrFalse($key_)
 	{
 		if($this->isRDBConnectionOk() && (strlen($this->_appSBCode)>0) && is_string($key_) && (strlen($key_)>0))
 		{
@@ -191,12 +193,12 @@ abstract class SBPersistentApp extends SBApp
 	}
 	/**
 	 * Remove the first $nOcurrences_ of $value_ from the list stored at $key_
-	 * @param unknown_type $key_	the key where the list is stored at
-	 * @param unknown_type $value_	the value to be removed
-	 * @param unknown_type $nOcurrences_	the first 'n' ocurrences to be removed from the list
+	 * @param string $key_	the key where the list is stored
+	 * @param string $value_	the value to be removed
+	 * @param integer $nOcurrences_	the first 'n' ocurrences to be removed from the list
 	 * @return integer|false the number of removed elements or false if any error occurs
 	 */
-	protected function lremOrFalse($key_,$value_,$nOcurrences_=0)
+	public function lremOrFalse($key_,$value_,$nOcurrences_=0)
 	{
 		if($this->isRDBConnectionOk() && (strlen($this->_appSBCode)>0) && is_string($key_) && (strlen($key_)>0))
 		{
@@ -218,7 +220,7 @@ abstract class SBPersistentApp extends SBApp
 	 * @param string $value_	the value to be added to the set
 	 * @return integer|false	the number of members added to the set (only one in this case) or false if any error occurs
 	 */
-	protected function saddOrFalse($key_,$value_)
+	public function saddOrFalse($key_,$value_)
 	{
 		if($this->isRDBConnectionOk() && (strlen($this->_appSBCode)>0) && is_string($key_) && (strlen($key_)>0))
 		{
@@ -234,11 +236,11 @@ abstract class SBPersistentApp extends SBApp
 	}
 	/**
 	 * Removes a member $value_ from a set stored at $key_
-	 * @param string $key_ the key where the set is stored at
-	 * @param mixed $value_	the value of the new member to be added
+	 * @param string $key_ the key where the set is stored
+	 * @param string $value_	the value of the member to be removed
 	 * @return integer|false the number of members removed from the set (only one in this case) or false if any error occurs
 	 */
-	protected function sremOrFalse($key_,$value_)
+	public function sremOrFalse($key_,$value_)
 	{
 		if($this->isRDBConnectionOk() && (strlen($this->_appSBCode)>0) && is_string($key_) && (strlen($key_)>0))
 		{
@@ -253,12 +255,12 @@ abstract class SBPersistentApp extends SBApp
 		return false;
 	}
 	/**
-	 * Checks if an element with value $value_ is member of a set stored at key $key_
-	 * @param unknown_type $key_	the key where the set is stored at
-	 * @param unknown_type $value_	the value of the member to be checked
+	 * Checks if a member with value $value_ is member of the set stored at $key_
+	 * @param string $key_	the key where the set is stored
+	 * @param string $value_	the value of the member to be checked
 	 * @return integer|false 0 if the member is not in the set or the key does not exist, 1 if it is in the set, false if any error occurs
 	 */
-	protected function sismemberOrFalse($key_,$value_)
+	public function sismemberOrFalse($key_,$value_)
 	{
 		if($this->isRDBConnectionOk() && (strlen($this->_appSBCode)>0) && is_string($key_) && (strlen($key_)>0))
 		{
@@ -273,11 +275,11 @@ abstract class SBPersistentApp extends SBApp
 		return false;
 	}
 	/**
-	 * Removes and returns a random element from the set stored at key $key_
-	 * @param string $key_	the key where the set is stored at
+	 * Removes and returns a random element from the set stored at $key_
+	 * @param string $key_	the key where the set is stored
 	 * @return mixed|false the removed element or false if any error occurs
 	 */
-	protected function spopOrFalse($key_)
+	public function spopOrFalse($key_)
 	{
 		if($this->isRDBConnectionOk() && (strlen($this->_appSBCode)>0) && is_string($key_) && (strlen($key_)>0))
 		{
@@ -296,7 +298,7 @@ abstract class SBPersistentApp extends SBApp
 	 * @param string $key_ the key where the set is stored at
 	 * @return array|false the members of the set or false if any error occurs
 	 */
-	protected function smembersOrFalse($key_)
+	public function smembersOrFalse($key_)
 	{
 		if($this->isRDBConnectionOk() && (strlen($this->_appSBCode)>0) && is_string($key_) && (strlen($key_)>0))
 		{
@@ -315,7 +317,7 @@ abstract class SBPersistentApp extends SBApp
 	 * @param string $key_	the key where the set is stored at
 	 * @return integer|bool	the number of elements or false if any error occurs
 	 */
-	protected function scardOrFalse($key_)
+	public function scardOrFalse($key_)
 	{
 		if($this->isRDBConnectionOk() && (strlen($this->_appSBCode)>0) && is_string($key_) && (strlen($key_)>0))
 		{
@@ -331,7 +333,14 @@ abstract class SBPersistentApp extends SBApp
 	}
 	
 	/* hashes */
-	protected function hsetOrFalse($key_,$field_,$value_)
+	/**
+	 * Sets $field_ in the hash stored at $key_ to $value_
+	 * @param string $key_	the key where the hash is stored
+	 * @param string $field_	the field
+	 * @param mixed $value_	the value
+	 * @return integer|false	1 if $field_ is a new field in the hash and value was set, 0 if $field_ already exists in the hash and the value was updated, false if any error occurs
+	 */
+	public function hsetOrFalse($key_,$field_,$value_)
 	{
 		if($this->isRDBConnectionOk() && (strlen($this->_appSBCode)>0) && is_string($key_) && (strlen($key_)>0))
 		{
@@ -345,7 +354,13 @@ abstract class SBPersistentApp extends SBApp
 		}
 		return false;
 	}
-	protected function hgetOrFalse($key_,$field_)
+	/**
+	 * Returns the value associated with $field_ in the hash stored at $key_
+	 * @param string $key_
+	 * @param string $field_
+	 * @return mixed|false	the value or false if any error occurs
+	 */
+	public function hgetOrFalse($key_,$field_)
 	{
 		if($this->isRDBConnectionOk() && (strlen($this->_appSBCode)>0) && is_string($key_) && (strlen($key_)>0))
 		{

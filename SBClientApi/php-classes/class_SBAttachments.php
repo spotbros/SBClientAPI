@@ -33,7 +33,7 @@ class SBAttachments
 	 */
 	private $_handlerIds;
 	/**
-	 * Array of file paths to unlink after finishing the upload
+	 * Array of file paths to unlink after finishing the upload (used for images)
 	 * @var array
 	 */
 	private $_filePathsToUnlink;
@@ -101,7 +101,6 @@ class SBAttachments
 		);
 		if(($handlerId=$this->_curlMngr->postFileToUrlOrFalse(SBVars::SB_WEBSERVICE_ADDR."/public-api/uploadAttachment.php", $filePath_, $params,$timeout_))!=false)
 		{
-			error_log("adding file upload handler ".$handlerId);
 			$this->_handlerIds[] = array("id"=>$handlerId,"attachmentType"=>$attachmentType_,);
 			return true;
 		}
